@@ -13,21 +13,45 @@
             setTimeout(async () => {
                 this.recipientTyping = true
                 console.log('recipient has started typing...')
-                setTimeout(() => {
-                    this.recipientTyping = false
-                    console.log('recipient has stopped typing...')
 
-                    console.log(response.imageToSend)
-                    if (response.imageToSend != null) {
+                // Send image if there is one
+                if (response.imageToSend != null) {
+                    setTimeout(() => {
+                        this.recipientTyping = false
+                        console.log('recipient has stopped typing...')
+
+                        console.log(response.imageToSend)
+                        
                         console.log('Will send image to user: ' + response.imageToSend)
                         $wire.addMessage(response.user, response.imageToSend)
                         console.log('image added to chat')
-                    }
+                        
+                        // Then simulate recipient typing for a few seconds
+                        setTimeout(() => {
+                            this.recipientTyping = true
+                            console.log('recipient has started typing...')
+                        }, 1000 * 2.1) // Number of milliseconds
 
-                    $wire.addMessage(response.user, response.text)
-                    console.log('message added to chat')
-                }, 1000 * response.waitForResponse) // Number of milliseconds
+                        // Send message text
+                        setTimeout(() => {
+                            this.recipientTyping = false
+                            console.log('recipient has stopped typing...')
 
+                            $wire.addMessage(response.user, response.text)
+                            console.log('message added to chat')
+                        }, 1000 * response.waitForResponse / 2) // Number of milliseconds
+                    }, 1000 * response.waitForResponse / 2) // Number of milliseconds
+
+                } else {
+                    // Send message text
+                    setTimeout(() => {
+                        this.recipientTyping = false
+                        console.log('recipient has stopped typing...')
+
+                        $wire.addMessage(response.user, response.text)
+                        console.log('message added to chat')
+                    }, 1000 * response.waitForResponse / 2) // Number of milliseconds 
+                }
             }, 1000 * response.waitForRead) // Number of milliseconds
         }
     }"
@@ -72,7 +96,7 @@
         </div>
 
         {{-- Display all messages --}}
-        <div class="max-h-[82vh] flex-1 overflow-y-auto p-4 bg-sky-100">
+        <div class="max-h-[82vh] flex-1 overflow-y-auto p-6 bg-sky-100">
             @foreach($messages as $message)
                 <div class="mb-4">
 
@@ -84,17 +108,23 @@
                     @else {{-- If this is NOT an image message --}}
                         <div 
                             class="
-                                flex items-start
+                                flex items-start w-max-[80%]
                                 {{ $message['user'] === $user ? 'justify-end' : 'justify-start' }} 
                             "
                         >
                             <p
                                 class="
-                                    border p-2 rounded-lg
+                                    border px-4 py-3 rounded-lg text-xl
                                     {{ $message['user'] === $user ? 'bg-green-50 border-green-100' : 'bg-zinc-50 border-zinc-100' }} 
                                     shadow-sm
                                 "
-                            >{!! $message['text'] !!}</p>
+                            >
+                                {!! $message['text'] !!}
+                            
+                                <span class="text-gray-500 text-sm ml-2">
+                                    {{ $message['created_at']->format('H:i') }}
+                                </span>
+                            </p>
                         </div>
                     @endif
                 </div>
@@ -119,6 +149,7 @@
                 <input 
                     type="text" 
                     wire:model.live="newMessage" 
+                    x-on:keydown.enter="sendMessage()"
                     class="flex-1 p-2 rounded text-xl ml-2" 
                     placeholder="Type a message" 
                 />

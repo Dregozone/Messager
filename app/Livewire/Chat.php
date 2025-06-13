@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Services\ChatResponseService;
 use Livewire\Component;
 use Livewire\Attributes\Url;
 
@@ -48,6 +49,7 @@ class Chat extends Component
         $this->messages[] = [
             'text' => $this->newMessage,
             'user' => $this->user,
+            'created_at' => now(),
         ];
 
         $this->newMessage = ''; // Clear the input field after sending
@@ -66,7 +68,8 @@ class Chat extends Component
         // sleep($waitForRead); // Wait for a proportional time based on message length
 
         // Find appropriate response
-        $response = 'This is a response to: ' . $lastMessage['text'];
+        // $response = 'This is a response to: ' . $lastMessage['text'];
+        [$response, $imageToSend] = ChatResponseService::generateResponse($lastMessage, $this->recipient, $this->messages);
 
         // Simulate typing for propportianal time based on reply message length
         $waitForResponse = 0.3 * strlen($response);
@@ -81,28 +84,7 @@ class Chat extends Component
         // $waitForResponse = 1;
         // End debug
 
-        $withImg = strpos($lastMessage['text'], 'pic') !== false; //rand(0, 1) === 1; // Randomly decide if the response includes an image, Later replace this with logic to determine if an image should be included
-        if ($withImg) {
-            $numberOfAvailableImagesFromThisRecipient = count(scandir(public_path() . "/images/" . $this->recipient)) - 2;
-
-            if ($numberOfAvailableImagesFromThisRecipient > 0) {
-                $randomImageIndex = rand(0, $numberOfAvailableImagesFromThisRecipient - 1);
-                $imageFiles = array_values(
-                    array_diff(
-                        scandir(
-                            public_path() . "/images/" . $this->recipient
-                        ), ['..', '.']
-                    )
-                );
-
-                $imageToSend = $imageFiles[$randomImageIndex];
-            } else {
-                $imageToSend = 'noImgAvailable.png'; // No images available
-            }
-
-            // Append to original reply a note that this reply includes an image
-            $response .= '. Ill also send across an image with this message.';
-        }
+        
 
         return [
             'user' => $this->recipient,
@@ -132,6 +114,7 @@ class Chat extends Component
         $this->messages[] = [
             'text' => $text,
             'user' => $user,
+            'created_at' => now(),
         ];
     }
 
