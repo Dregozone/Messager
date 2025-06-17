@@ -20,6 +20,8 @@ class Chat extends Component
 
     public string $newMessage = '';
 
+    public array $users = [];
+
     public function mount()
     {
         if ($this->user == '') {
@@ -28,15 +30,40 @@ class Chat extends Component
         
         $this->messages = []; // Initialize messages array
 
-        if ($this->recipient == '') {
-            $this->recipient = 'Recipient'; // Set a default recipient
+        if ($this->recipient !== '') {
+            // Find recipient initials
+            $recipientParts = explode(' ', $this->recipient);
+            $this->recipientInitials = '';
+            foreach ($recipientParts as $part) {
+                $this->recipientInitials .= strtoupper($part[0]); // Get initials of recipient
+            }
         }
 
-        // Find recipient initials
-        $recipientParts = explode(' ', $this->recipient);
-        $this->recipientInitials = '';
-        foreach ($recipientParts as $part) {
-            $this->recipientInitials .= strtoupper($part[0]); // Get initials of recipient
+        // Build list of users that can be chatted with
+        $this->users = [
+            'Alice' => 'Alice',
+            'Bob' => 'Bob',
+            'Charlie' => 'Charlie',
+            'Diana' => 'Diana',
+            'Recipient' => 'Recipient',
+            'Person 2' => 'Person 2',
+        ];
+    }
+
+    public function selectRecipient(string $recipient)
+    {
+        $this->recipient = $recipient;
+
+        if ($recipient !== '') {
+            // Find recipient initials
+            $recipientParts = explode(' ', $this->recipient);
+            $this->recipientInitials = '';
+            foreach ($recipientParts as $part) {
+                $this->recipientInitials .= strtoupper($part[0]); // Get initials of recipient
+            }
+
+            // Reset messages for the new recipient
+            $this->messages = [];
         }
     }
 

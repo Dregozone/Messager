@@ -24,17 +24,23 @@ Class ChatResponseService
             $genericResponses = array_merge($genericResponses, $recipientGenericResponses ?? []);
         }
 
-        $response = $genericResponses[array_rand($genericResponses)]; // Default to a random generic response to keep the conversation going but try to match better later
+        $response = '';
 
         // Check if the last message contains any keywords
+        $foundKeyword = false;
         foreach ($wordAliases as $keyword => $aliases) {
             foreach ($aliases as $alias) {
                 if (stripos($lastMessage['text'], $alias) !== false) {
                     // If an alias is found, use the keyword for the response
-                    $response = $availableResponses[$keyword][array_rand($availableResponses[$keyword])];
-                    break;
+                    $response .= $availableResponses[$keyword][array_rand($availableResponses[$keyword])] . ' ';
+                    $foundKeyword = true;
                 }
             }
+        }
+
+        // If no keyword was found, use a generic response
+        if (! $foundKeyword) {
+            $response = $genericResponses[array_rand($genericResponses)];
         }
 
         $alsoSendPicAliases = ['pic', 'image', 'photo', 'picture', 'img'];
@@ -49,6 +55,11 @@ Class ChatResponseService
         }
 
         if ($withImg) {
+            if (is_dir(public_path() . "/images/" . $recipient) === false) {
+                // If the recipient's image directory does not exist, create it
+                mkdir(public_path() . "/images/" . $recipient, 0755, true);
+            }
+            
             $numberOfAvailableImagesFromThisRecipient = count(scandir(public_path() . "/images/" . $recipient)) - 3; // -3 to account for '.', '..', and '.gitignore'
 
             if ($numberOfAvailableImagesFromThisRecipient > 0) {

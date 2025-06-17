@@ -1,6 +1,7 @@
 <?php
 
 $wordAliases = [
+    'hi' => ['hi', 'hello', 'hey', 'greetings', 'heya', 'hiya', 'yo'],
     'happy' => ['happy', 'joyful', 'cheerful', 'content'],
     'sad' => ['sad', 'unhappy', 'sorrowful', 'dejected'],
     'angry' => ['angry', 'mad', 'irate', 'furious'],
@@ -9,6 +10,7 @@ $wordAliases = [
 ];
 
 $availableResponses = [
+    'hi' => ['Hello!', 'Hi there!', 'Hey stranger!', 'Greetings!', 'Howdy!'],
     'happy' => ['I\'m glad to hear that!', 'What made you happy?', 'That\'s wonderful!'],
     'sad' => ['I\'m sorry to hear that.', 'What\'s been bothering you?', 'It\'s okay to feel sad sometimes.'],
     'angry' => ['I understand why you\'re upset.', 'What made you angry?', 'It\'s important to express your feelings.'],
