@@ -140,9 +140,18 @@
                 @foreach($messages as $message)
                     <div class="mb-4">
 
-                        @if (strpos($message['text'], '<img ') !== false) {{-- If this is an image message --}}
+                        @if (! empty($message['image'])) {{-- If this is an image message --}}
                             <div>
-                                <p>{!! $message['text'] !!}</p>
+                                <p>
+                                    <img
+                                        src="{{ $message['image'] }}"
+                                        alt="Image"
+                                        style="
+                                            max-width: 45%; height: auto; min-width: 100px; min-height: 100px; border: 1px solid #ccc;
+                                            border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                                        "
+                                    >
+                                </p>
                             </div>
 
                         @else {{-- If this is NOT an image message --}}
@@ -159,8 +168,8 @@
                                         shadow-sm
                                     "
                                 >
-                                    {!! $message['text'] !!}
-                                
+                                    {{ $message['text'] }}
+
                                     <span class="text-gray-500 text-sm ml-2">
                                         {{ $message['created_at']->format('H:i') }}
                                     </span>

@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Livewire\Chat;
+
 Class ChatResponseService
 {
     /**
@@ -12,11 +14,14 @@ Class ChatResponseService
      */
     public static function generateResponse(array $lastMessage, string $recipient, array $allMessages): array
     {
-        // Bring in the response data for this recipient if it exists, otherwise use the default data
-        require_once public_path() . '/data/default.php'; // Load the default data file
+        // The recipient is used in file paths below, so anyone not on the list gets the default data only
+        $recipient = Chat::allowedRecipient($recipient);
 
-        if (file_exists(public_path() . '/data/' . $recipient . '.php')) {
-            require_once public_path() . '/data/' . $recipient . '.php'; // Load recipient-specific data if it exists
+        // Bring in the response data for this recipient if it exists, otherwise use the default data
+        require public_path() . '/data/default.php'; // Load the default data file
+
+        if ($recipient !== '' && file_exists(public_path() . '/data/' . $recipient . '.php')) {
+            require public_path() . '/data/' . $recipient . '.php'; // Load recipient-specific data if it exists
 
             // Merge the arrays to ensure recipient-specific responses override default ones
             $wordAliases = array_merge($wordAliases, $recipientWordAliases ?? []);
@@ -54,7 +59,7 @@ Class ChatResponseService
             }
         }
 
-        if ($withImg) {
+        if ($withImg && $recipient !== '') {
             if (is_dir(public_path() . "/images/" . $recipient) === false) {
                 // If the recipient's image directory does not exist, create it
                 mkdir(public_path() . "/images/" . $recipient, 0755, true);

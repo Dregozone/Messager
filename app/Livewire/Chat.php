@@ -4,14 +4,18 @@ namespace App\Livewire;
 
 use App\Services\ChatResponseService;
 use Livewire\Component;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 
 class Chat extends Component
 {
+    // The only people that can be chatted with; the recipient is used in file paths, so never trust it otherwise
+    public const RECIPIENTS = ['Alice', 'Bob', 'Charlie', 'Diana', 'Recipient', 'Person 2'];
+
     #[Url]
     public string $user = ''; // The user sending the message
 
-    #[Url]
+    #[Url, Locked]
     public string $recipient = ''; // The recipient of the messages who is being spoken to and simulated
 
     public string $recipientInitials = ''; // Initials of the recipient for display purposes
@@ -30,6 +34,8 @@ class Chat extends Component
         
         $this->messages = []; // Initialize messages array
 
+        $this->recipient = self::allowedRecipient($this->recipient); // Comes from the URL, so check it
+
         if ($this->recipient !== '') {
             // Find recipient initials
             $recipientParts = explode(' ', $this->recipient);
@@ -40,18 +46,18 @@ class Chat extends Component
         }
 
         // Build list of users that can be chatted with
-        $this->users = [
-            'Alice' => 'Alice',
-            'Bob' => 'Bob',
-            'Charlie' => 'Charlie',
-            'Diana' => 'Diana',
-            'Recipient' => 'Recipient',
-            'Person 2' => 'Person 2',
-        ];
+        $this->users = array_combine(self::RECIPIENTS, self::RECIPIENTS);
+    }
+
+    public static function allowedRecipient(string $recipient): string
+    {
+        return in_array($recipient, self::RECIPIENTS, true) ? $recipient : '';
     }
 
     public function selectRecipient(string $recipient)
     {
+        $recipient = self::allowedRecipient($recipient);
+
         $this->recipient = $recipient;
 
         if ($recipient !== '') {
@@ -124,22 +130,17 @@ class Chat extends Component
 
     public function addMessage(string $user, string $text)
     {
+        $image = null;
+
         if (strpos($text, '.jpg') !== false || strpos($text, '.png') !== false) { // This is an image message
-            // Convert this to image message contents
-            $text = '
-                <img 
-                    src="' . asset('images/' . $this->recipient . '/' . $text) . '" 
-                    alt="Image" 
-                    style="
-                        max-width: 45%; height: auto; min-width: 100px; min-height: 100px; border: 1px solid #ccc; 
-                        border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                    "
-                >
-            ';
+            // Only the file name is used, so the image always comes from the recipient's own folder
+            $image = asset('images/' . rawurlencode($this->recipient) . '/' . rawurlencode(basename($text)));
+            $text = '';
         }
 
         $this->messages[] = [
             'text' => $text,
+            'image' => $image,
             'user' => $user,
             'created_at' => now(),
         ];
