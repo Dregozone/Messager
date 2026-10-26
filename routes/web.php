@@ -3,4 +3,4 @@
 use App\Livewire\Chat;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', Chat::class)->name('chat');
+Route::livewire('/', Chat::class)->name('chat');
