@@ -1,6 +1,6 @@
 <?php
 
-use App\Livewire\Chat;
+use App\Livewire\Messenger;
 use Illuminate\Support\Facades\Route;
 
-Route::livewire('/', Chat::class)->name('chat');
+Route::livewire('/', Messenger::class)->name('messenger');
